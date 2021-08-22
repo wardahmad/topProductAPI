@@ -9,12 +9,18 @@ def test_main():
     assert response.status_code == 200
     assert response.json() == {"message": "Hello World"}
 
-def test_top_product():
-    response = client.get("/topProduct")
-    assert response.status_code == 415
-    assert response.json() == {"detail": "Unsupported Media Type"}
-
+# in main.py, When Uncomment this variable ( csv File Path = '.\data.mp3 ), we'll return passed'
 # def test_top_product():
 #     response = client.get("/topProduct")
-#     assert response.status_code == 200
-#     # assert response.json() == {"detail": ""}
+#     assert response.status_code == 415
+#     assert response.json() == {"detail": "Unsupported Media Type"}
+
+# I Need to create a Variable for this function, to test function outputs
+
+
+def test_top_product():
+    response = client.get("/topProduct")
+    assert response.status_code == 200
+    assert response.json() == {
+        "top_product": "ice cream card",
+        "product_rating": 5.1}
