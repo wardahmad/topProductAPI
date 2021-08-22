@@ -25,6 +25,6 @@
 * deactivate the virtualenv:
 `deactivate`
 * <a href="https://pypi.org/project/autopep8/">automatically formats Python code to conform to the PEP 8 style guide:</a>
-`pip install --upgrade autopep8`
-`autopep8 --in-place --aggressive --aggressive main.py`
-`autopep8 --in-place --aggressive --aggressive test_main.py`
+    * `pip install --upgrade autopep8`
+    * `autopep8 --in-place --aggressive --aggressive main.py`
+    * `autopep8 --in-place --aggressive --aggressive test_main.py`
