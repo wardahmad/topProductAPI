@@ -90,7 +90,6 @@ async def one_product(id: int):
     for product in allProductArr:
         if (product["id"] == id):
             return product
-
     return {"message" : "Product not found"}
 
 
@@ -110,9 +109,28 @@ async def create_product(product: Product):
 @app.put("/updateProduct/{id}")
 async def update_product(id: int, product: Product):
     allProductArr = data["allProduct"]
+    product_to_update = None
+
+    for oneProd in allProductArr:  
+        if (oneProd["id"] == id):
+            product_to_update = oneProd
+    if product_to_update is not None:
+        oneProd["id"] =  product.id
+        oneProd["product_name"] = product.product_name
+        oneProd["customer_average_rating"] = product.customer_average_rating
+        return allProductArr       
+    return {"message": "The product was not found"}
+
+# [Delete] route
+@app.delete("/deleteProduct/{id}")
+async def delete_product(id: int):
+    allProductArr = data["allProduct"]
+    product_to_delete = None
     for oneProd in allProductArr:
         if (oneProd["id"] == id):
-            oneProd["id"] =  product.id
-            oneProd["product_name"] = product.product_name
-            oneProd["customer_average_rating"] = product.customer_average_rating
-    return data
+            product_to_delete = oneProd
+
+    if product_to_delete is not None:
+        allProductArr.remove(product_to_delete)
+        return allProductArr
+    return {"message":"Product not found"}
