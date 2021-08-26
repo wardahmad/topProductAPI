@@ -1,7 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path
+from pydantic import BaseModel
 import csv
 import json
 import os
+
+class Product(BaseModel):
+    id:int
+    product_name:str
+    customer_average_rating:float
+
 
 # Create FastAPI instance
 app = FastAPI()
@@ -10,16 +17,14 @@ csvFilePath = '.\\data.csv'
 jsonFilePath = '.\\products.json'
 #csvFilePath = '.\data.mp3'
 
+
 # [GET] route
-
-
 @app.get("/")
 async def main():
     return {"message": "Hello World"}
 
+
 # [GET] route, Convert CSV file to JSON
-
-
 @app.get("/topProduct")
 async def top_product():
 
@@ -63,3 +68,51 @@ async def top_product():
         return top_product
 
 # try and catch
+
+
+data = {"allProduct":[
+                    {"id":132,"product_name":"Massoub gift card","customer_average_rating":5.0},
+                    {"id":154,"product_name":"Kebdah gift card","customer_average_rating":3.2},
+                    {"id":12,"product_name":"Fatayer gift card","customer_average_rating":1.8},
+                    {"id":55,"product_name":"ice cream card","customer_average_rating":5.1}
+                    ]}
+
+# [GET] route (Return all Product)
+@app.get("/product")
+async def all_prodect():
+    return data["allProduct"]
+
+
+# [GET] route (Return one Product)
+@app.get("/product/{id}")
+async def one_product(id: int):
+    allProductArr = data["allProduct"]
+    for product in allProductArr:
+        if (product["id"] == id):
+            return product
+
+    return {"message" : "Product not found"}
+
+
+# [POST] route
+@app.post("/createProduct")
+async def create_product(product: Product):
+    allProductArr = data["allProduct"]
+    for oneProd in allProductArr:
+        if (oneProd["id"] == product.id):
+            return {"message": "product already Exist"}
+    newProduct = {"id":product.id,"product_name":product.product_name,"customer_average_rating":product.customer_average_rating}
+    allProductArr.append(newProduct)
+    return allProductArr
+    
+
+# [PUT] route
+@app.put("/updateProduct/{id}")
+async def update_product(id: int, product: Product):
+    allProductArr = data["allProduct"]
+    for oneProd in allProductArr:
+        if (oneProd["id"] == id):
+            oneProd["id"] =  product.id
+            oneProd["product_name"] = product.product_name
+            oneProd["customer_average_rating"] = product.customer_average_rating
+    return data
