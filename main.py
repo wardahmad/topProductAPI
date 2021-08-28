@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path, File, UploadFile
 from pydantic import BaseModel
-import csv
+import pandas as pd
 import json
 import os
 
@@ -13,61 +13,31 @@ class Product(BaseModel):
 # Create FastAPI instance
 app = FastAPI()
 
-csvFilePath = '.\\data.csv'
 jsonFilePath = '.\\products.json'
-#csvFilePath = '.\data.mp3'
 
 
-# [GET] route
-@app.get("/")
-async def main():
-    return {"message": "Hello World"}
-
-
-# [GET] route, Convert CSV file to JSON
-@app.get("/topProduct")
-async def top_product():
-
+# [POST] route, Convert CSV file to JSON
+@app.post("/topProduct")
+async def top_product(csv_file: UploadFile = File(...)):
+    
     # Split the path and Check the file type
-    if os.path.splitext(csvFilePath)[1] != ".csv":
+    if os.path.splitext(csv_file.filename)[1] != ".csv":
         raise HTTPException(status_code=415, detail="Unsupported Media Type")
 
-    # Read the contents of a CSV file
-    with open(csvFilePath, 'r', encoding='utf-8') as csvFile:
+    # read the csv file, Using (pandas mudeol)
+    dataframe = pd.read_csv(csv_file.filename)
+    # Sort the csv file, from highest value to lowest value according to the ["customer_average_rating"] column
+    sortedData = dataframe.sort_values(by="customer_average_rating", ascending=False)
+    # [0] => index for the first value
+    firstRow = sortedData.iloc[0]
+    top_product = {"top_product":firstRow["product_name"],"product_rating":firstRow["customer_average_rating"]}
 
-        csvReader = csv.reader(csvFile)
-
-        # Skip first row of csv file (the header)
-        next(csvReader)
-
-        # Convert each row and add it to object variable
-        data = {"allProduct": []}
-        top_product = None
-        for row in csvReader:  # o(n)
-            # each row = [id,product_name,customer_average_rating]
-            id = int(row[0])
-            product = str(row[1])
-            rating = float(row[2])
-
-            newProduct = {"ID": id, "product": product, "rating": rating}
-
-            if (top_product is None):
-                top_product = {
-                    "top_product": product,
-                    "product_rating": rating}
-            elif (rating > top_product["product_rating"]):
-                top_product = {
-                    "top_product": product,
-                    "product_rating": rating}
-
-            data["allProduct"].append(newProduct)
+    # top_product  = firstRow.to_json(orient="index")
 
     # Open a JSON writer, and Return top_product as JSON
     with open(jsonFilePath, 'w', encoding='utf-8') as jsonFile:
         json.dump(top_product, jsonFile, indent=2)
         return top_product
-
-# try and catch
 
 
 data = {"allProduct":[
